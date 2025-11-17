@@ -2,54 +2,53 @@ import { Toolbox } from "./toolbox.js";
 
 export class MemoryButton {
 
-    x = 50;
-    y = 50;
-    color;
-    width = 100;
-    height = 100;
-    canvas;
-    pencil;
-    isFaceUp = false; 
-    toolbox = new Toolbox();
-
     constructor(canvas, pencil, x, y, color) {
         this.x = x;
         this.y = y;
         this.color = color;
-        this.pencil = pencil;
+
+        this.width = 100;
+        this.height = 100;
+
         this.canvas = canvas;
-        canvas.addEventListener("click", (e) => this.onClick(e));
+        this.pencil = pencil;
+
+        this.flipped = false;   // <-- replaces isFaceUp
+        this.matched = false;   // <-- added for match detection
     }
 
     draw() {
-        
-        if(this.isFaceUp) {
-            this.pencil.fillStyle = this.color; // Set the fill color
-            this.pencil.fillRect(this.x, this.y, this.width, this.height); // Draw a filled rectangle at (50, 50) with width 100 and height 75
-        } else { //draw face down
-            this.pencil.strokeStyle = "gray"; // Set the outline color to red
-            this.pencil.lineWidth = 10;       // Set the outline width to 2 pixels
-            this.pencil.strokeRect(this.x, this.y, this.width, this.height); // Draws an outlined rectangle at (50,50) with width 100 and height 75
+        if (this.flipped || this.matched) {
+            // face-up
+            this.pencil.fillStyle = this.color;
+            this.pencil.fillRect(this.x, this.y, this.width, this.height);
+        } else {
+            // face-down
+            this.pencil.strokeStyle = "gray";
+            this.pencil.lineWidth = 10;
+            this.pencil.strokeRect(this.x, this.y, this.width, this.height);
         }
     }
-    
-    onClick(event) {
-        let clickX = event.offsetX;
-        let clickY = event.offsetY;
 
-        let isClickInButton = this.toolbox.isWithinRect(
-            clickX, clickY, this.x, this.y, this.width, this.height
+    // Check if a mouse click is inside the card
+    isClicked(mx, my) {
+        return (
+            mx > this.x &&
+            mx < this.x + this.width &&
+            my > this.y &&
+            my < this.y + this.height
         );
-
-        if(isClickInButton) {
-            this.isFaceUp = !this.isFaceUp;
-        }
     }
 
-    
-    
-    
+    // Flip card face-up
+    flip() {
+        this.flipped = true;
+    }
 
-
-
+    // Flip card face-down (but not if it's matched)
+    flipBack() {
+        if (!this.matched) {
+            this.flipped = false;
+        }
+    }
 }
